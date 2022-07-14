@@ -19,7 +19,7 @@ import (
 )
 
 func GetDiskEncryptionType(kvdata *KVData) {
-	cred, err := authenticate() // autenticate the app to Azure
+	cred, err := authenticate()
 	if err != nil {
 		log.Fatal("failed authenticating", err)
 		return
@@ -144,7 +144,7 @@ func WriteBEKFile(value string) {
 	}
 }
 
-func getToken() (string, error) {
+func GetToken() (string, error) {
 
 	URL := "https://login.microsoftonline.com/" + os.Getenv("AZURE_TENANT_ID") + "/oauth2/v2.0/token"
 
@@ -164,7 +164,6 @@ func getToken() (string, error) {
 		return "", nil
 	}
 
-	// ugly ass operations to parse token from response, as this can`t be handled as json data
 	temp := strings.Split(string(respData), ":")[4]
 	temp = strings.Trim(temp, `"`)
 
@@ -177,7 +176,7 @@ func getToken() (string, error) {
 ////////
 ////
 
-func GetSecret(kvdata *KVData) (string, error) {
+func GetSecret(token string, kvdata *KVData) (string, error) {
 
 	endpoint := "https://" + kvdata.KeyVaultName + "//secrets/" + kvdata.SecretName + "/" + kvdata.SecretVersion + "?api-version=7.3"
 
@@ -186,10 +185,7 @@ func GetSecret(kvdata *KVData) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	token, err := getToken()
-	if err != nil {
-		return "", err
-	}
+
 	token = "Bearer " + token
 	request.Header.Add("Authorization", token)
 	resp, err := client.Do(request)
@@ -214,7 +210,7 @@ func GetSecret(kvdata *KVData) (string, error) {
 
 }
 
-func UnwrapSecret(secret string, kvdata *KVData) (string, error) {
+func UnwrapSecret(secret string, token string, kvdata *KVData) (string, error) {
 
 	endpoint := "https://" + kvdata.KeyVaultName + "//keys/" + kvdata.KeyName + "/" + kvdata.KeyVersion + "/unwrapkey?api-version=7.3"
 
@@ -224,10 +220,6 @@ func UnwrapSecret(secret string, kvdata *KVData) (string, error) {
 		return "", err
 	}
 
-	token, err := getToken()
-	if err != nil {
-		return "", err
-	}
 	token = "Bearer " + token
 	client := &http.Client{Transport: nil}
 	request, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(json))

@@ -1,6 +1,6 @@
 # Script to unlock/decrypt ADE disk for VM ( troubleshooting purposes)
 
-Script to obtain the key file for decrypting Azure disks.
+Script to obtain the key file for decrypted ADE disks
 ---
 
 Requires to have an AD SP created and have the following env variabler set:

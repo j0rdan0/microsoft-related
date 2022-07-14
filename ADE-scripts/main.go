@@ -12,16 +12,21 @@ func main() {
 	kv := new(core.KVData)
 	core.GetDiskEncryptionType(kv)
 
-	secret, err := core.GetSecret(kv)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(-1)
-	}
-	data, err := core.UnwrapSecret(secret, kv)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(-1)
-	}
+	token, err := core.GetToken()
+	handleError(err)
+
+	secret, err := core.GetSecret(token, kv)
+	handleError(err)
+
+	data, err := core.UnwrapSecret(secret, token, kv)
+	handleError(err)
 	core.WriteBEKFile(data)
 
+}
+
+func handleError(err error) {
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(-1)
+	}
 }
