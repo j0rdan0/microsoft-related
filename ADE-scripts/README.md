@@ -1,13 +1,31 @@
 # Script to unlock/decrypt ADE disk for VM ( troubleshooting purposes)
 
--- To do:
+Script to obtain the key file for decrypting Azure disks.
+---
 
-* script should require as less parameters as possible, need to have logic for automatically fetching input data from a given subcription
-* run on multiple platorms, both Windows and Linux and have login to identify for which OS should run and follow appropiate code path for this 
-* to be written in Go
+Requires to have an AD SP created and have the following env variabler set:
 
--- Starting point:
+* AZURE_CLIENT_ID
+* AZURE_TENANT_ID
+* AZURE_CLIENT_SECRET
 
-https://docs.microsoft.com/en-us/troubleshoot/azure/virtual-machines/unlock-encrypted-disk-offline
+
+SP can be created prior to this running:
+
+
+az ad sp create-for-rbac -n "disk-decrypt"
+
+
+The output can be used to fill in the environment variables required above
+
+
+
+For getting a disk decrypted the following information needs to be filled in the config.json file:
+---
+
+* "SubscriptionID"
+* "ResourceGroup"
+* "DiskName"
+* "VMName"
 
 
