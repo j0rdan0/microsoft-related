@@ -12,6 +12,10 @@ func main() {
 	kv := new(core.KVData)
 	core.GetDiskEncryptionType(kv)
 
+	if ok, err := core.SetAccessPolicy(kv); !ok {
+		log.Fatal(err)
+	}
+
 	token, err := core.GetToken()
 	handleError(err)
 

@@ -14,7 +14,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 	ct "github.com/daviddengcn/go-colortext"
 )
 
@@ -171,10 +173,52 @@ func GetToken() (string, error) {
 
 }
 
-// to set access policy for keyvault SP. see: func (*VaultsClient) UpdateAccessPolicy TO DO
-////
-////////
-////
+func SetAccessPolicy(kvdata *KVData) (bool, error) {
+	config, err := readConfig("./config.json")
+	if err != nil {
+		return false, err
+	}
+	cred, err := authenticate() // autenticate the app to Azure
+	if err != nil {
+
+		return false, err
+	}
+	client, err := armkeyvault.NewVaultsClient(config.SubscriptionID, cred, nil)
+	if err != nil {
+		return false, err
+	}
+	oid := os.Getenv("AZURE_CLIENT_ID")
+	tenant := os.Getenv("AZURE_TENANT_ID")
+
+	params := armkeyvault.VaultAccessPolicyParameters{
+		Properties: &armkeyvault.VaultAccessPolicyProperties{
+			AccessPolicies: []*armkeyvault.AccessPolicyEntry{
+				{
+
+					ObjectID: &oid,
+					Permissions: &armkeyvault.Permissions{
+						Keys: []*armkeyvault.KeyPermissions{
+							to.Ptr(armkeyvault.KeyPermissionsAll),
+						},
+						Secrets: []*armkeyvault.SecretPermissions{
+							to.Ptr(armkeyvault.SecretPermissionsAll),
+						},
+					},
+					TenantID: &tenant,
+				},
+			},
+		},
+	}
+	_, err = client.UpdateAccessPolicy(context.Background(), config.ResourceGroup, strings.Split(kvdata.KeyVaultName, ".")[0], armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
+	if err != nil {
+		return false, err
+	}
+
+	log.Printf("[***] created KeyvaultAccessPolicy\n")
+
+	return true, nil
+
+}
 
 func GetSecret(token string, kvdata *KVData) (string, error) {
 
