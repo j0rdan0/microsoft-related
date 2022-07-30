@@ -23,7 +23,7 @@ import (
 func GetDiskEncryptionType(kvdata *KVData) {
 	cred, err := authenticate()
 	if err != nil {
-		log.Fatal("failed authenticating", err)
+		log.Fatal("failed authenticating: ", err)
 		return
 	}
 	config, err := readConfig("./config.json")
@@ -34,12 +34,12 @@ func GetDiskEncryptionType(kvdata *KVData) {
 
 	diskClient, err := armcompute.NewDisksClient(config.SubscriptionID, cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed creating disk client: ", err)
 		return
 	}
 	resp, err := diskClient.Get(context.Background(), config.ResourceGroup, config.DiskName, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed getting disk: ", err)
 		return
 	}
 
@@ -173,6 +173,10 @@ func GetToken() (string, error) {
 
 }
 
+// need to replace the implementation with direct REST API, as this shit doesn`t work
+// PUT https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/
+// providers/Microsoft.KeyVault/vaults/{vaultName}/accessPolicies/{operationKind}?api-version=2021-10-01
+
 func SetAccessPolicy(kvdata *KVData) (bool, error) {
 	config, err := readConfig("./config.json")
 	if err != nil {
@@ -187,28 +191,29 @@ func SetAccessPolicy(kvdata *KVData) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	oid := os.Getenv("AZURE_CLIENT_ID")
-	tenant := os.Getenv("AZURE_TENANT_ID")
+	oid := os.Getenv("AZURE_OBJECT_ID")    // this calls requires an SP, not an APP
+	tenant := os.Getenv("AZURE_TENANT_ID") // this seems to have a problem fetching env variable, need to check why
 
 	params := armkeyvault.VaultAccessPolicyParameters{
 		Properties: &armkeyvault.VaultAccessPolicyProperties{
 			AccessPolicies: []*armkeyvault.AccessPolicyEntry{
 				{
 
-					ObjectID: &oid,
+					ObjectID: to.Ptr(oid),
 					Permissions: &armkeyvault.Permissions{
 						Keys: []*armkeyvault.KeyPermissions{
-							to.Ptr(armkeyvault.KeyPermissionsAll),
+							to.Ptr(armkeyvault.KeyPermissionsUnwrapKey),
 						},
 						Secrets: []*armkeyvault.SecretPermissions{
-							to.Ptr(armkeyvault.SecretPermissionsAll),
+							to.Ptr(armkeyvault.SecretPermissionsGet),
 						},
 					},
-					TenantID: &tenant,
+					TenantID: to.Ptr(tenant),
 				},
 			},
 		},
 	}
+	// resource group for keyvault can be different than resource group for disk!! need to adapt to this
 	_, err = client.UpdateAccessPolicy(context.Background(), config.ResourceGroup, strings.Split(kvdata.KeyVaultName, ".")[0], armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
 	if err != nil {
 		return false, err
@@ -303,4 +308,12 @@ func UnwrapSecret(secret string, token string, kvdata *KVData) (string, error) {
 
 	return temp, nil
 
+}
+
+//only need the unwrapKey and get secret perms
+
+func SetAccessPolicyREST(kvdata *KVData) (bool, error) {
+	// to implement this function using REST API
+
+	return true, nil
 }
