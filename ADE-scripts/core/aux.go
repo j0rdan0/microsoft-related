@@ -29,6 +29,10 @@ AZURE_CLIENT_ID
 AZURE_TENANT_ID
 AZURE_CLIENT_SECRET
 
+also need
+
+AZURE_OBJECT_ID for the SP to be able to add the KV access policy
+
 */
 func authenticate() (*azidentity.DefaultAzureCredential, error) {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)

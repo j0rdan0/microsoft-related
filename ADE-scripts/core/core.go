@@ -47,6 +47,7 @@ func GetDiskEncryptionType(kvdata *KVData) {
 		ct.Background(ct.Red, false)
 		log.Printf("*** disk %s is not encrypted, no decryption needed", config.DiskName)
 		ct.ResetColor()
+		os.Exit(-1)
 
 	} else {
 		encVersion, err := getADEVersion()
