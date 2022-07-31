@@ -93,7 +93,7 @@ func getADEVersion() (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	cred, err := authenticate() // autenticate the app to Azure
+	cred, err := authenticate()
 	if err != nil {
 
 		return -1, err
@@ -173,10 +173,6 @@ func GetToken() (string, error) {
 	return (strings.Split(temp, `"}`)[0]), nil
 
 }
-
-// need to replace the implementation with direct REST API, as this shit doesn`t work
-// PUT https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/
-// providers/Microsoft.KeyVault/vaults/{vaultName}/accessPolicies/{operationKind}?api-version=2021-10-01
 
 func SetAccessPolicy(kvdata *KVData) (bool, error) {
 	config, err := readConfig("./config.json")
@@ -309,12 +305,4 @@ func UnwrapSecret(secret string, token string, kvdata *KVData) (string, error) {
 
 	return temp, nil
 
-}
-
-//only need the unwrapKey and get secret perms
-
-func SetAccessPolicyREST(kvdata *KVData) (bool, error) {
-	// to implement this function using REST API
-
-	return true, nil
 }

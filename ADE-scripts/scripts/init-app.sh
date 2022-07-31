@@ -1,12 +1,20 @@
 #!/bin/bash
 
+APP_NAME="decrypt-app"
+RED='\033[0;31m'
+NC='\033[0m'
+
+CONFIG_FILE="../config.json"
+
+# check to see if config file exists
+if [ ! -f $CONFIG_FILE ];then
+    echo "[*] config file not found"
+    exit -1
+fi
+
 # get information from config.json file needed to set IAM access control
 VM_NAME=$(cat ../config.json | jq .VMName |tr -d "\"")
 RG=$(cat ../config.json | jq .ResourceGroup | tr -d "\"")
-APP_NAME="decrypt-app"
-
-RED='\033[0;31m'
-NC='\033[0m'
 
 #create app 
 az ad app create --display-name $APP_NAME 1>/dev/null && printf "${RED}[*]${NC} created app ${RED}$APP_NAME${NC}\n"
