@@ -114,6 +114,8 @@ func getADEVersion() (int, error) {
 	}
 	return version, nil
 
+	// need to find a way of finding the disk name directly from the VM name
+
 }
 
 func WriteBEKFile(value string) {

@@ -1,9 +1,9 @@
-# Script to unlock/decrypt ADE disk for VM ( troubleshooting purposes)
+# Script to unlock/decrypt ADE disk for Windows VM
 
 Script to obtain the key file for decrypting ADE disks
 ---
 
-Requires to have an AD SP created and have the following env variables set:
+Requires to have an AAD app registered for programmatic access to the ARM API and have the following env variables set for app authentication:
 
 
 * AZURE_CLIENT_ID
@@ -11,15 +11,25 @@ Requires to have an AD SP created and have the following env variables set:
 * AZURE_CLIENT_SECRET
 * AZURE_OBJECT_ID
 
-For getting an app created in your AAD run:
+For getting an app created in your AAD tenant use:
 ---
 
 ```
 scripts/init-app.sh
 ```
 
-The output can be used to fill in the environment variables required above
+The output can be used to fill in the environment variables required above.
 
+e.g:
+
+```
+echo "export AZURE_CLIENT_ID=0000-000-000-0000\n\
+export AZURE_TENANT_ID=0000-000-000-0000\n\
+export AZURE_CLIENT_SECRET=000-000-000-0000\n\
+export AZURE_OBJECT_ID= 0000-000-000-0000" >> ~/.bashrc
+
+source ~/.bashrc
+```
 
 For getting a disk decrypted the following information needs to be filled in the config.json file:
 ---
@@ -31,7 +41,7 @@ For getting a disk decrypted the following information needs to be filled in the
 
 // need to find a way of finding the disk name directly from the VM name 
 
-For cleaning up the app created in your AAD tenant run:
+For cleaning up the app created in your AAD tenant use:
 ---
 
 ```
