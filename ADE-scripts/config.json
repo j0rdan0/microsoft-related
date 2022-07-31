@@ -1,6 +1,5 @@
 {
-    "SubscriptionID": "0000000-0000-0000-0000-00000000000",
-    "ResourceGroup": "",
-    "DiskName": "",
-    "VMName": ""
+    "SubscriptionID": "0000000-0000-0000-0000-abea0678d7ee",
+    "ResourceGroup": "win-rg",
+    "VMName": "winServer2019"
 }

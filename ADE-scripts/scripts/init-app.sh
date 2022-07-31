@@ -16,6 +16,7 @@ fi
 VM_NAME=$(cat ../config.json | jq .VMName |tr -d "\"")
 RG=$(cat ../config.json | jq .ResourceGroup | tr -d "\"")
 
+
 #create app 
 az ad app create --display-name $APP_NAME 1>/dev/null && printf "${RED}[*]${NC} created app ${RED}$APP_NAME${NC}\n"
 
@@ -36,13 +37,15 @@ AZURE_CLIENT_SECRET=$(az ad app credential reset --id $AZURE_CLIENT_ID --append 
 
 printf "${RED}[*]${NC} creating RBAC rules\n"
 
-# get os disk resource URI and KV resource URI
+# get os disk resource URI, VM and KV resource URI
 OS_DISK=$(az vm show -g $RG -n $VM_NAME| jq .storageProfile.osDisk.managedDisk.id| tr -d "\"")
 KV=$(az vm show -g $RG -n $VM_NAME | jq .'resources[0]'.settings.KeyVaultResourceId | tr -d "\"")
+VM=$(az vm show -g $RG -n $VM_NAME | jq .id | tr -d "\"")
 
 # create IAM access roles
-az role assignment create --assignee $AZURE_OBJECT_ID --role "Reader" --scope $OS_DISK 1>/dev/null
-az role assignment create --assignee $AZURE_OBJECT_ID --role "Contributor" --scope $KV 1>/dev/null
+az role assignment create --assignee $AZURE_OBJECT_ID --role "Reader" --scope $OS_DISK 1>/dev/null && printf "${RED}[*]${NC} created Reader role for OS Disk resource ${RED}$OS_DISK${NC}\n"
+az role assignment create --assignee $AZURE_OBJECT_ID --role "Contributor" --scope $KV 1>/dev/null && printf "${RED}[*]${NC} created Contributor role for KeyVault resource ${RED}$KV${NC}\n"
+az role assignment create --assignee $AZURE_OBJECT_ID --role "Reader" --scope $VM 1>/dev/null  && printf "${RED}[*]${NC} created Reader role for VM resource ${RED}$VM${NC}\n"
 
 printf "${RED}[*]${NC} save the below env variables for authentication\n\n"
 

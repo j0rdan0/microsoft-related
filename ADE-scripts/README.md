@@ -5,7 +5,6 @@ Script to obtain the key file for decrypting ADE disks
 
 Requires to have an AAD app registered for programmatic access to the ARM API and have the following env variables set for app authentication:
 
-
 * AZURE_CLIENT_ID
 * AZURE_TENANT_ID
 * AZURE_CLIENT_SECRET
@@ -36,12 +35,9 @@ For getting a disk decrypted the following information needs to be filled in the
 
 * "SubscriptionID"
 * "ResourceGroup"
-* "DiskName"
 * "VMName"
 
-// need to find a way of finding the disk name directly from the VM name 
-
-For cleaning up the app created in your AAD tenant use:
+For cleaning up the app created in your AAD tenant and remove the RBAC roles assigned to it use:
 ---
 
 ```

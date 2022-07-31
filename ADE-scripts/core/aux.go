@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 
@@ -48,4 +49,29 @@ func isEncrypted(r armcompute.DisksClientGetResponse) bool {
 		return true
 	}
 	return false
+}
+func getOSDisk(cred *azidentity.DefaultAzureCredential, subscriptionId string, resourceGroup string, vmName string) (*string, error) {
+	/*cred, err := authenticate()
+	if err != nil {
+
+		return nil, err
+	}
+	*/
+
+	vmClient, err := armcompute.NewVirtualMachinesClient(subscriptionId, cred, nil)
+	if err != nil {
+
+		return nil, err
+	}
+	resp, err := vmClient.Get(context.Background(), resourceGroup, vmName, nil)
+	if err != nil {
+
+		return nil, err
+	}
+	diskName := resp.Properties.StorageProfile.OSDisk.Name
+	if diskName == nil {
+		return nil, err
+	}
+
+	return diskName, err
 }

@@ -37,7 +37,14 @@ func GetDiskEncryptionType(kvdata *KVData) {
 		log.Fatal("failed creating disk client: ", err)
 		return
 	}
-	resp, err := diskClient.Get(context.Background(), config.ResourceGroup, config.DiskName, nil)
+
+	// need to find disk name by only using the VM Name
+	diskName, err := getOSDisk(cred, config.SubscriptionID, config.ResourceGroup, config.VMName)
+	if err != nil {
+		log.Fatal("failed getting disk name: ", err)
+		return
+	}
+	resp, err := diskClient.Get(context.Background(), config.ResourceGroup, *diskName, nil)
 	if err != nil {
 		log.Fatal("failed getting disk: ", err)
 		return
@@ -45,7 +52,7 @@ func GetDiskEncryptionType(kvdata *KVData) {
 
 	if !isEncrypted(resp) {
 		ct.Background(ct.Red, false)
-		log.Printf("*** disk %s is not encrypted, no decryption needed", config.DiskName)
+		log.Printf("*** disk %s is not encrypted, no decryption needed", *diskName)
 		ct.ResetColor()
 		os.Exit(-1)
 
@@ -55,7 +62,7 @@ func GetDiskEncryptionType(kvdata *KVData) {
 			log.Fatal(err)
 			return
 		}
-		fmt.Printf("[***] disk %s is", config.DiskName)
+		fmt.Printf("[***] disk %s is", *diskName)
 		ct.Background(ct.Red, false)
 		fmt.Printf(" encrypted ")
 		ct.ResetColor()
@@ -114,8 +121,6 @@ func getADEVersion() (int, error) {
 	}
 	return version, nil
 
-	// need to find a way of finding the disk name directly from the VM name
-
 }
 
 func WriteBEKFile(value string) {
@@ -144,7 +149,7 @@ func WriteBEKFile(value string) {
 		log.Printf("[**] all %d bytes written to file bek.file\n", n)
 
 	} else {
-		log.Fatal("only %d bytes written to file\n", n)
+		log.Fatalf("only %d bytes written to file\n", n)
 
 	}
 }
