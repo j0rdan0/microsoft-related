@@ -3,7 +3,7 @@
 Script to obtain the BEK file for decrypting ADE disks
 ---
 
-Requires to have an AAD app registered for programmatic access to the ARM API and have the following env variables set for app authentication:
+Requires an AAD app registered for programmatic access to the ARM API and the following env variables set for app authentication:
 
 * AZURE_CLIENT_ID
 * AZURE_TENANT_ID
@@ -34,7 +34,7 @@ Program usage:
 ---
 
 ```
-    ./decrypt -n/--name <VM Name> -g/--resource-group <Resource group> -s/--subscription-id <Subscription ID>
+    ./decrypt -n/--name <VM Name> -g/--resource-group <Resource group> -s/--subscription <Subscription ID>
 ```
 
 For cleaning up the app created in your AAD tenant and remove the RBAC roles assigned to it use:

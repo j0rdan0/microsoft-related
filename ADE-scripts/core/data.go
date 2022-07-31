@@ -11,7 +11,7 @@ type KVData struct {
 }
 
 type opts struct {
-	SubscriptionID string `short:"s" long:"subscription-id" description:"Subscription ID" required:"true"`
+	SubscriptionID string `short:"s" long:"subscription" description:"Subscription ID" required:"true"`
 	ResourceGroup  string `short:"g" long:"resource-group" description:"Resource group" required:"true"`
 	VMName         string `short:"n" long:"name" description:"VM Name" required:"true"`
 }

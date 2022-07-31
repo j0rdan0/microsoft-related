@@ -22,7 +22,7 @@ AZURE_CLIENT_ID=$(az ad app list --display-name $APP_NAME --query [].appId -o ts
 AZURE_OBJECT_ID=$(az ad sp list --display-name $APP_NAME --query [].id -o tsv)
 
 
-printf "${RED}[*]${NC} deleting RBAC rules\n"
+printf "${RED}[*]${NC} deleting RBAC rules for app ${RED}$APP_NAME${NC}\n"
 # delete RBAC roles
 az role assignment delete --assignee $AZURE_OBJECT_ID --role "Reader" --scope $OS_DISK 1>/dev/null  && printf "${RED}[*]${NC} deleted Reader role for OS Disk resource ${RED}$OS_DISK${NC}\n"
 az role assignment delete --assignee $AZURE_OBJECT_ID --role "Contributor" --scope $KV 1>/dev/null  && printf "${RED}[*]${NC} deleted Contributor role for KeyVault resource ${RED}$KV${NC}\n"

@@ -9,14 +9,6 @@ if [ $# -lt 2 ];then
     exit -1
 fi
 
-CONFIG_FILE="../config.json"
-
-# check to see if config file exists
-if [ ! -f $CONFIG_FILE ];then
-    echo "[*] config file not found"
-    exit -1
-fi
-
 # get VM name and RG from cmd args
 VM_NAME=$1
 RG=$2
