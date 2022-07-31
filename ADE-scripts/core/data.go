@@ -1,12 +1,5 @@
 package core
 
-type Config struct {
-	SubscriptionID string
-	ResourceGroup  string
-	DiskName       string
-	VMName         string
-}
-
 // this needs to be used to get secret value and after that unwrap the value using the key
 
 type KVData struct {
@@ -15,4 +8,10 @@ type KVData struct {
 	SecretVersion string
 	KeyName       string
 	KeyVersion    string
+}
+
+type opts struct {
+	SubscriptionID string `short:"s" long:"subscription-id" description:"Subscription ID" required:"true"`
+	ResourceGroup  string `short:"g" long:"resource-group" description:"Resource group" required:"true"`
+	VMName         string `short:"n" long:"name" description:"VM Name" required:"true"`
 }

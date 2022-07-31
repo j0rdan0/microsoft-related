@@ -18,33 +18,33 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 	ct "github.com/daviddengcn/go-colortext"
+	flags "github.com/jessevdk/go-flags"
+)
+
+var (
+	options opts
+	parser  = flags.NewParser(&options, flags.Default)
 )
 
 func GetDiskEncryptionType(kvdata *KVData) {
+	getArgs()
 	cred, err := authenticate()
 	if err != nil {
 		log.Fatal("failed authenticating: ", err)
 		return
 	}
-	config, err := readConfig("./config.json")
-	if err != nil {
-		log.Fatal("error reading config: ", err)
-		return
-	}
-
-	diskClient, err := armcompute.NewDisksClient(config.SubscriptionID, cred, nil)
+	diskClient, err := armcompute.NewDisksClient(options.SubscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal("failed creating disk client: ", err)
 		return
 	}
 
-	// need to find disk name by only using the VM Name
-	diskName, err := getOSDisk(cred, config.SubscriptionID, config.ResourceGroup, config.VMName)
+	diskName, err := getOSDisk(cred, options.SubscriptionID, options.ResourceGroup, options.VMName)
 	if err != nil {
 		log.Fatal("failed getting disk name: ", err)
 		return
 	}
-	resp, err := diskClient.Get(context.Background(), config.ResourceGroup, *diskName, nil)
+	resp, err := diskClient.Get(context.Background(), options.ResourceGroup, *diskName, nil)
 	if err != nil {
 		log.Fatal("failed getting disk: ", err)
 		return
@@ -96,21 +96,17 @@ func GetDiskEncryptionType(kvdata *KVData) {
 }
 
 func getADEVersion() (int, error) {
-	config, err := readConfig("./config.json")
-	if err != nil {
-		return -1, err
-	}
 	cred, err := authenticate()
 	if err != nil {
 
 		return -1, err
 	}
-	extClient, err := armcompute.NewVirtualMachineExtensionsClient(config.SubscriptionID, cred, nil)
+	extClient, err := armcompute.NewVirtualMachineExtensionsClient(options.SubscriptionID, cred, nil)
 	if err != nil {
 		return -1, err
 	}
 
-	resp, err := extClient.Get(context.Background(), config.ResourceGroup, config.VMName, "AzureDiskEncryption", nil)
+	resp, err := extClient.Get(context.Background(), options.ResourceGroup, options.VMName, "AzureDiskEncryption", nil)
 	if err != nil {
 		return -1, nil
 	}
@@ -182,21 +178,17 @@ func GetToken() (string, error) {
 }
 
 func SetAccessPolicy(kvdata *KVData) (bool, error) {
-	config, err := readConfig("./config.json")
-	if err != nil {
-		return false, err
-	}
-	cred, err := authenticate() // autenticate the app to Azure
+	cred, err := authenticate()
 	if err != nil {
 
 		return false, err
 	}
-	client, err := armkeyvault.NewVaultsClient(config.SubscriptionID, cred, nil)
+	client, err := armkeyvault.NewVaultsClient(options.SubscriptionID, cred, nil)
 	if err != nil {
 		return false, err
 	}
 	oid := os.Getenv("AZURE_OBJECT_ID")    // this calls requires an SP, not an APP
-	tenant := os.Getenv("AZURE_TENANT_ID") // this seems to have a problem fetching env variable, need to check why
+	tenant := os.Getenv("AZURE_TENANT_ID") // this seems to have a problem fetching env variable in Azure Cloud Shell, need to check why
 
 	params := armkeyvault.VaultAccessPolicyParameters{
 		Properties: &armkeyvault.VaultAccessPolicyProperties{
@@ -217,8 +209,8 @@ func SetAccessPolicy(kvdata *KVData) (bool, error) {
 			},
 		},
 	}
-	// resource group for keyvault can be different than resource group for disk!! need to adapt to this
-	_, err = client.UpdateAccessPolicy(context.Background(), config.ResourceGroup, strings.Split(kvdata.KeyVaultName, ".")[0], armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
+	// resource group for keyvault can be different than resource group for disk!! need to handle this in the future
+	_, err = client.UpdateAccessPolicy(context.Background(), options.ResourceGroup, strings.Split(kvdata.KeyVaultName, ".")[0], armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
 	if err != nil {
 		return false, err
 	}
@@ -267,7 +259,7 @@ func UnwrapSecret(secret string, token string, kvdata *KVData) (string, error) {
 
 	endpoint := "https://" + kvdata.KeyVaultName + "//keys/" + kvdata.KeyName + "/" + kvdata.KeyVersion + "/unwrapkey?api-version=7.3"
 
-	body := map[string]string{"alg": "RSA-OAEP", "value": secret}
+	body := map[string]string{"alg": "RSA-OAEP", "value": secret} // can`t assume I know the enc algo, need to fetch this dynamically
 	json, err := json.Marshal(body)
 	if err != nil {
 		return "", err

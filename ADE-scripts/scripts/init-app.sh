@@ -4,6 +4,11 @@ APP_NAME="decrypt-app"
 RED='\033[0;31m'
 NC='\033[0m'
 
+if [ $# -lt 2 ];then
+    printf "${RED}Usage:${NC} $0 <vm name> <resource group>\n"
+    exit -1
+fi
+
 CONFIG_FILE="../config.json"
 
 # check to see if config file exists
@@ -12,10 +17,9 @@ if [ ! -f $CONFIG_FILE ];then
     exit -1
 fi
 
-# get information from config.json file needed to set IAM access control
-VM_NAME=$(cat ../config.json | jq .VMName |tr -d "\"")
-RG=$(cat ../config.json | jq .ResourceGroup | tr -d "\"")
-
+# get VM name and RG from cmd args
+VM_NAME=$1
+RG=$2
 
 #create app 
 az ad app create --display-name $APP_NAME 1>/dev/null && printf "${RED}[*]${NC} created app ${RED}$APP_NAME${NC}\n"

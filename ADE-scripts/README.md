@@ -1,6 +1,6 @@
 # Script to unlock/decrypt ADE disk for Windows VM
 
-Script to obtain the key file for decrypting ADE disks
+Script to obtain the BEK file for decrypting ADE disks
 ---
 
 Requires to have an AAD app registered for programmatic access to the ARM API and have the following env variables set for app authentication:
@@ -14,7 +14,7 @@ For getting an app created in your AAD tenant use:
 ---
 
 ```
-scripts/init-app.sh
+scripts/init-app.sh <vm name> <resource group>
 ```
 
 The output can be used to fill in the environment variables required above.
@@ -30,18 +30,18 @@ export AZURE_OBJECT_ID= 0000-000-000-0000" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-For getting a disk decrypted the following information needs to be filled in the config.json file:
+Program usage:
 ---
 
-* "SubscriptionID"
-* "ResourceGroup"
-* "VMName"
+```
+    ./decrypt -n/--name <VM Name> -g/--resource-group <Resource group> -s/--subscription-id <Subscription ID>
+```
 
 For cleaning up the app created in your AAD tenant and remove the RBAC roles assigned to it use:
 ---
 
 ```
-scripts\clean-app.sh
+scripts\clean-app.sh <vm name> <resource group>
 ```
 
 
