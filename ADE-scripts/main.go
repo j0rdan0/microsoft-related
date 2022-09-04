@@ -14,7 +14,7 @@ func main() {
 	if ok, err := core.SetAccessPolicy(kv); !ok {
 		log.Fatal(err)
 	}
-	token, err := core.GetToken()
+	token, err := core.GetToken(false)
 	core.HandleError(err)
 
 	secret, err := core.GetSecret(token, kv)

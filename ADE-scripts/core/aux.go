@@ -1,9 +1,13 @@
 package core
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"log"
 	"os"
+
+	"net/http"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
@@ -63,4 +67,45 @@ func getArgs() {
 			os.Exit(1)
 		}
 	}
+}
+
+func CheckResourceGroup() (string, error) {
+
+	//// resource group for keyvault can be different than resource group for disk!! need to handle this in the future
+
+	// will use Azure Resource Graph API to find RG for KV automatically:
+	// see https://docs.microsoft.com/en-us/rest/api/azureresourcegraph/resourcegraph(2020-04-01-preview)/resources/resources?tabs=HTTP
+
+	URL := "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2020-04-01-preview"
+	client := &http.Client{}
+	body := []byte(`{
+		"query":  "Resources | where type =~ 'Microsoft.KeyVault/vaults'"
+	}`)
+	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(body))
+	token, err := GetToken(true)
+	if err != nil {
+		return "", nil
+	}
+	t := "Bearer " + token
+
+	req.Header.Set("Authorization", t)
+	req.Header.Set("Content-type", "application/json")
+
+	if err != nil {
+		return "", nil
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", nil
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", nil
+	}
+	return string(data), nil
+
+	// need to process the returned data to confirm KV Resource group
+
 }

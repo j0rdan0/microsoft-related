@@ -150,13 +150,18 @@ func WriteBEKFile(value string) {
 	}
 }
 
-func GetToken() (string, error) {
+func GetToken(management bool) (string, error) {
 
 	URL := "https://login.microsoftonline.com/" + os.Getenv("AZURE_TENANT_ID") + "/oauth2/v2.0/token"
 
 	body := url.Values{}
 	body.Add("client_id", os.Getenv("AZURE_CLIENT_ID"))
-	body.Add("scope", "https://vault.azure.net/.default")
+	if management {
+		body.Add("scope", "https://management.azure.com/.default") // get management token
+	} else {
+		body.Add("scope", "https://vault.azure.net/.default") // get key vault token
+	}
+
 	body.Add("grant_type", "client_credentials")
 	body.Add("client_secret", os.Getenv("AZURE_CLIENT_SECRET"))
 	resp, err := http.PostForm(URL, body)
@@ -210,6 +215,9 @@ func SetAccessPolicy(kvdata *KVData) (bool, error) {
 		},
 	}
 	// resource group for keyvault can be different than resource group for disk!! need to handle this in the future
+
+	// will use Azure Resource Graph API to find RG for KV automatically:
+	// see https://docs.microsoft.com/en-us/rest/api/azureresourcegraph/resourcegraph(2020-04-01-preview)/resources/resources?tabs=HTTP
 	_, err = client.UpdateAccessPolicy(context.Background(), options.ResourceGroup, strings.Split(kvdata.KeyVaultName, ".")[0], armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
 	if err != nil {
 		return false, err
