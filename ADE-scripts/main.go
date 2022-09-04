@@ -25,3 +25,5 @@ func main() {
 	core.WriteBEKFile(data)
 
 }
+
+// to also implement automated rescue VM creation using Hyper-V

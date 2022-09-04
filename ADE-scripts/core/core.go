@@ -51,7 +51,7 @@ func GetDiskEncryptionType(kvdata *KVData) {
 	}
 
 	if !isEncrypted(resp) {
-		ct.Background(ct.Red, false)
+		ct.Background(ct.Blue, false)
 		log.Printf("*** disk %s is not encrypted, no decryption needed", *diskName)
 		ct.ResetColor()
 		os.Exit(-1)
@@ -63,7 +63,7 @@ func GetDiskEncryptionType(kvdata *KVData) {
 			return
 		}
 		fmt.Printf("[***] disk %s is", *diskName)
-		ct.Background(ct.Red, false)
+		ct.Background(ct.Blue, false)
 		fmt.Printf(" encrypted ")
 		ct.ResetColor()
 		fmt.Printf("using ADE version %d\n", encVersion)
