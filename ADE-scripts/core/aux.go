@@ -1,16 +1,16 @@
 package core
 
 import (
-	"bytes"
 	"context"
-	"io"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
-	"net/http"
-
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -69,43 +69,41 @@ func getArgs() {
 	}
 }
 
-func CheckResourceGroup() (string, error) {
+func checkResourceGroup(keyvault string, subscription string, cred *azidentity.DefaultAzureCredential) (string, error) {
 
-	//// resource group for keyvault can be different than resource group for disk!! need to handle this in the future
+	ctx := context.Background()
+	client, err := armresourcegraph.NewClient(cred, nil)
+	if err != nil {
+		return "", err
+	}
+	query := fmt.Sprintf("Resources | project id, name, resourceGroup | where name == '%s'", keyvault)
+	res, err := client.Resources(ctx,
+		armresourcegraph.QueryRequest{
+			Query: to.Ptr(query),
+			Subscriptions: []*string{
+				to.Ptr(subscription)},
+		},
+		nil)
+	if err != nil {
+		return "", err
+	}
 
-	// will use Azure Resource Graph API to find RG for KV automatically:
-	// see https://docs.microsoft.com/en-us/rest/api/azureresourcegraph/resourcegraph(2020-04-01-preview)/resources/resources?tabs=HTTP
+	// uglies way to get data back as a struct, but too tired now to refactor
+	data := make([]byte, 0)
+	data, err = json.Marshal(res.Data)
+	if err != nil {
+		return "", err
+	}
+	var d []RG
 
-	URL := "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2020-04-01-preview"
-	client := &http.Client{}
-	body := []byte(`{
-		"query":  "Resources | where type =~ 'Microsoft.KeyVault/vaults'"
-	}`)
-	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(body))
-	token, err := GetToken(true)
+	err = json.Unmarshal(data, &d)
 	if err != nil {
 		return "", nil
 	}
-	t := "Bearer " + token
-
-	req.Header.Set("Authorization", t)
-	req.Header.Set("Content-type", "application/json")
-
-	if err != nil {
-		return "", nil
+	var rg string
+	for _, elem := range d {
+		rg = fmt.Sprint(elem.ResourceGroup)
 	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", nil
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", nil
-	}
-	return string(data), nil
-
-	// need to process the returned data to confirm KV Resource group
-
+	fmt.Println(rg)
+	return rg, nil
 }

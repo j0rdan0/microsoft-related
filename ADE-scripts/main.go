@@ -12,6 +12,7 @@ func main() {
 	core.GetDiskEncryptionType(kv)
 
 	if ok, err := core.SetAccessPolicy(kv); !ok {
+		log.Println("error")
 		log.Fatal(err)
 	}
 	token, err := core.GetToken(false)
@@ -19,7 +20,6 @@ func main() {
 
 	secret, err := core.GetSecret(token, kv)
 	core.HandleError(err)
-
 	data, err := core.UnwrapSecret(secret, token, kv)
 	core.HandleError(err)
 	core.WriteBEKFile(data)

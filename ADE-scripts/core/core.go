@@ -214,11 +214,21 @@ func SetAccessPolicy(kvdata *KVData) (bool, error) {
 			},
 		},
 	}
-	// resource group for keyvault can be different than resource group for disk!! need to handle this in the future
+	// resource group for keyvault can be different than resource group for disk
 
 	// will use Azure Resource Graph API to find RG for KV automatically:
 	// see https://docs.microsoft.com/en-us/rest/api/azureresourcegraph/resourcegraph(2020-04-01-preview)/resources/resources?tabs=HTTP
-	_, err = client.UpdateAccessPolicy(context.Background(), options.ResourceGroup, strings.Split(kvdata.KeyVaultName, ".")[0], armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
+	keyVaultName := strings.Split(kvdata.KeyVaultName, ".")[0]
+	resourceGroup, err := checkResourceGroup(keyVaultName, options.SubscriptionID, cred)
+	fmt.Println(kvdata.KeyVaultName)
+	if err != nil {
+		return false, err
+	}
+	fmt.Println(resourceGroup)
+	if resourceGroup != options.ResourceGroup {
+		log.Printf("[**] Keyvault deployed in different resource group")
+	}
+	_, err = client.UpdateAccessPolicy(context.Background(), resourceGroup, keyVaultName, armkeyvault.AccessPolicyUpdateKindAdd, params, nil)
 	if err != nil {
 		return false, err
 	}

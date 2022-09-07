@@ -15,3 +15,6 @@ type opts struct {
 	ResourceGroup  string `short:"g" long:"resource-group" description:"Resource group" required:"true"`
 	VMName         string `short:"n" long:"name" description:"VM Name" required:"true"`
 }
+type RG struct {
+	ResourceGroup string
+}
