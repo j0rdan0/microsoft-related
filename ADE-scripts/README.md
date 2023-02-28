@@ -1,13 +1,50 @@
-# Script to unlock/decrypt ADE disk for VM ( troubleshooting purposes)
+# Script to unlock/decrypt ADE disk for Windows VM
 
--- To do:
+Script to obtain the BEK file for decrypting ADE disks
+---
 
-* script should require as less parameters as possible, need to have logic for automatically fetching input data from a given subcription
-* run on multiple platorms, both Windows and Linux and have login to identify for which OS should run and follow appropiate code path for this 
-* to be written in Go
+Requires an AAD app registered for programmatic access to the ARM API and the following env variables set for app authentication:
 
--- Starting point:
+* AZURE_CLIENT_ID
+* AZURE_TENANT_ID
+* AZURE_CLIENT_SECRET
+* AZURE_OBJECT_ID
 
-https://docs.microsoft.com/en-us/troubleshoot/azure/virtual-machines/unlock-encrypted-disk-offline
+For getting an app created in your AAD tenant use:
+---
+
+```
+scripts/init-app.sh <vm name> <resource group>
+```
+
+The output can be used to fill in the environment variables required above.
+
+e.g:
+
+```
+echo "export AZURE_CLIENT_ID=0000-000-000-0000\n\
+export AZURE_TENANT_ID=0000-000-000-0000\n\
+export AZURE_CLIENT_SECRET=000-000-000-0000\n\
+export AZURE_OBJECT_ID= 0000-000-000-0000" >> ~/.bashrc
+
+source ~/.bashrc
+```
+
+Program usage:
+---
+
+```
+    ./decrypt -n/--name <VM Name> -g/--resource-group <Resource group> -s/--subscription <Subscription ID>
+```
+
+For cleaning up the app created in your AAD tenant and remove the RBAC roles assigned to it use:
+---
+
+```
+scripts\clean-app.sh <vm name> <resource group>
+```
+
+
+
 
 
