@@ -3,20 +3,24 @@
 
 
 Simple class for adding the CIDR your public IP is part of and add it into the NSG Security Rule for not manually doing this all the time manually.                                                                                                                                 
+
 A Service Principal needs to be first created within the Subscription and given proper permissions to read NSGs and update Security rules. 
 
-The Service Principal needs to be granted the following RBAC permissions at the subscription scope:
+The Service Principal needs to be granted the following RBAC permissions at the subscription scope
 		```
-		* Microsoft.Network/networkSecurityGroups/securityRules/read
-		* Microsoft.Network/networkSecurityGroups/securityRules/write
-		* Microsoft.Network/networkSecurityGroups/read
+		- Microsoft.Network/networkSecurityGroups/securityRules/read
+		- Microsoft.Network/networkSecurityGroups/securityRules/write
+		-  Microsoft.Network/networkSecurityGroups/read
 		```
-An example of how to define the custom role needed for the SP can be found in the whitelist-app-role.json file. For role creation AZ cli can be used:
+
+
+An example of how to define the custom role needed for the SP can be found in the whitelist-app-role.json file. For role creation AZ cli can be used
+
 	```
 	az role definition create --role-definition whitelist-app-role.json
 	```
 
-In order to instantiate an NSGManager object the following parameters are required:
+In order to instantiate an NSGManager object the following parameters are required
 
 ```
 Params for the NSGManager object:                                                                                                                                   
@@ -28,7 +32,7 @@ Params for the NSGManager object:
 	@rule_name: Security Rule name from the NSG                                                                                               
 ```
 
-Requirements:
+General requirements:
 
 ```
 	- python3.x 
