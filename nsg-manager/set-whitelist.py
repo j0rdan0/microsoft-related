@@ -60,6 +60,13 @@ class NSGManager:
             print("[*] Security Rule has been updated")
         except HttpResponseError as e:
             print(e)
+    def update_all_rules(self, rules):
+        cidr = self.get_cidr()
+        for rule in rules:
+            rg_name, nsg_name, rule_name = rule
+            self.update_rule(rg_name, nsg_name, rule_name, cidr)
+    
+    
 
 
 def main():
@@ -73,7 +80,13 @@ def main():
     rule_name="xxxxx",
 )
      cidr = nsg_manager.get_cidr()
-     nsg_manager.update_rule(cidr)
+     
+     rules = [
+    ("<resource group>", "<NSG name>", "<Security Rule name"),
+    ("<resource group>", "<NSG name>", "<Security Rule name"),
+    ("<resource group>", "<NSG name>", "<Security Rule name")
+]
+     nsg_manager.update_all_rules(rules)
      
 if __name__ == "__main__": main()
 
