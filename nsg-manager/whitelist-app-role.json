@@ -1,0 +1,17 @@
+{
+    "Name": "whitelist-app-role",
+    "IsCustom": true,
+    "Description": "Custom role for updating security rules in specific NSGs",
+    "Actions": [
+        "Microsoft.Network/networkSecurityGroups/securityRules/read",
+        "Microsoft.Network/networkSecurityGroups/securityRules/write",
+        "Microsoft.Network/networkSecurityGroups/read"
+    ],
+    "NotActions": [],
+    "DataActions": [],
+    "NotDataActions": [],
+    "AssignableScopes": [
+        "/subscriptions/<subscription-id>"
+    ]
+}
+
