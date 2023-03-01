@@ -7,9 +7,12 @@ Simple class for adding the CIDR your public IP is part of and add it into the N
 A Service Principal needs to be first created within the Subscription and given proper permissions to read NSGs and update Security rules. 
 
 The Service Principal needs to be granted the following RBAC permissions at the subscription scope
+
 		```
 		- Microsoft.Network/networkSecurityGroups/securityRules/read
+
 		- Microsoft.Network/networkSecurityGroups/securityRules/write
+
 		-  Microsoft.Network/networkSecurityGroups/read
 		```
 
